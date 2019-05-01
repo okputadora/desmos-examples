@@ -1,0 +1,51 @@
+<html>
+  <head>
+    <script src="https://www.desmos.com/api/v1.1/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
+  </head>
+
+  <body>
+    <div style="display: flex">
+      <div id="calculator" style="width: 600px; height: 600px;"></div>
+      <div id="calculator2" style="width: 600px; height: 600px;"></div>
+    </div>
+    <!-- <iframe src="https://www.desmos.com/calculator/ymllorabgu?embed" width="500px" height="500px" style="border: 1px solid #ccc" frameborder=0></iframe> -->
+  </body>
+
+  <script>
+    const el = document.getElementById('calculator');
+    const calculator = Desmos.GraphingCalculator(el);
+
+    const el2 = document.getElementById('calculator2');
+    const calculator2 = Desmos.GraphingCalculator(el2);
+
+    // saves a list of the expressions so we know which expressions
+    // have already been assigned a HelperExpression function.
+    const expressionMap = {};
+
+    calculator.observeEvent('change', function() {
+      let state = calculator.getState();
+      let { list } = state.expressions;
+      // Initialize a helper expression for each eaxpression
+      list.forEach(expression => {
+        // console.log(expression);
+        let { latex } = expression;
+        // console.log('latex: ', latex);
+        let varName = latex[0];
+        // console.log('varName: ', varName);
+        if (!expressionMap[varName]) {
+          // console.log('initiazlizing helper expression');
+          expressionMap[varName] = calculator.HelperExpression({
+            latex: varName,
+          });
+          // console.log('init numerValue change Listener');
+          expressionMap[varName].observe('numericValue', function() {
+            // console.log('numeric value changed');
+            calculator2.setState(calculator.getState());
+          });
+        } else {
+          calculator2.setState(state);
+        }
+      });
+    });
+  </script>
+</html>
